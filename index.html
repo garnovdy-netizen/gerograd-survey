@@ -59,6 +59,24 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .tile{flex-direction:row;align-items:center;gap:12px;padding:14px}
 .tile .ico{width:52px;height:52px;flex:none;border-radius:14px;border:2px solid var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:900;font-size:15px;color:#fff;-webkit-text-stroke:1px var(--ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ink)}
 .tile small:empty{display:none}
+.tile .ico.ico-img{width:64px;height:64px;border:0;background:none!important;border-radius:0}
+.tile .ico.ico-img img{width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 0 rgba(18,18,18,.18))}
+.tile>span:last-child{flex:1}
+.opt{min-width:0}
+.opt b,.opt small{overflow-wrap:break-word;min-width:0}
+@media (max-width:560px){
+  .grid.tiles{grid-template-columns:1fr;gap:10px}
+  .tiles .tile{padding:8px 14px 8px 8px;gap:12px}
+  .tiles .tile b{font-size:15px}
+  .tiles .tile small{font-size:12.5px}
+  .tiles .tile .ico.ico-img,.tiles .tile .ico.ico-img img{width:56px;height:56px}
+  .tiles .tile .ico:not(.ico-img){width:48px;height:48px;font-size:13px}
+  .tiles .opt[aria-pressed="true"]{transform:translateY(-2px)}
+  .g2 .opt:not(.tile) b{font-size:13.5px}
+}
+@media (max-width:560px){
+  .tile .ico.ico-img,.tile .ico.ico-img img{width:50px;height:50px}
+}
 .tile b{overflow-wrap:anywhere;hyphens:auto}
 @media (max-width:560px){
   .g2{gap:10px}
@@ -218,57 +236,57 @@ html,body{overflow-x:hidden}
         {k:'cartoon',t:'Мультяшный',d:'Как наклейка или Brawl Stars',img:'assets/style_cartoon.jpg'}] },
     { id:'heropart', title:'Что тебе важнее всего в герое?', sub:'Можно выбрать два', kind:'tile', multi:2,
       opts:[
-        {k:'face',t:'Лицо и причёска',d:'Чтобы был похож на меня',ico:'☺',c:'var(--yellow)'},
-        {k:'skins',t:'Одежда и скины',d:'Куртки, шлемы, кроссовки',ico:'TEE',c:'var(--blue)'},
-        {k:'pet',t:'Питомец',d:'Робот, дракон или кот рядом',ico:'PET',c:'var(--pink)'},
-        {k:'dance',t:'Танцы и эмоции',d:'Показать друзьям',ico:'♪',c:'var(--mint)'},
-        {k:'gear',t:'Гаджеты',d:'Ранец, ховерборд, дрон',img:'assets/jetpack.png',c:'#fff'},
-        {k:'level',t:'Уровень и титул',d:'Чтобы все видели, кто я',ico:'LV',c:'var(--orange)'}] },
+        {k:'face',t:'Лицо и причёска',d:'Чтобы был похож на меня',img:'assets/ic/heropart_face.png',c:'none'},
+        {k:'skins',t:'Одежда и скины',d:'Куртки, шлемы, кроссовки',img:'assets/ic/heropart_skins.png',c:'none'},
+        {k:'pet',t:'Питомец',d:'Робот, дракон или кот рядом',img:'assets/ic/heropart_pet.png',c:'none'},
+        {k:'dance',t:'Танцы и эмоции',d:'Показать друзьям',img:'assets/ic/heropart_dance.png',c:'none'},
+        {k:'gear',t:'Гаджеты',d:'Ранец, ховерборд, дрон',img:'assets/ic/heropart_gear.png',c:'none'},
+        {k:'level',t:'Уровень и титул',d:'Чтобы все видели, кто я',img:'assets/ic/heropart_level.png',c:'none'}] },
     { id:'look', title:'Какое приложение круче?', sub:'Посмотри на экраны и выбери один', kind:'look', multi:false,
       opts:[{k:'arcade',t:'Аркада',d:'Яркое, как наклейки'},{k:'neon',t:'Неон',d:'Тёмное, светится'},{k:'soft',t:'Мягкое',d:'Пастель и мягкие формы'}] },
     { id:'room', title:'Какой будет твоя комната трофеев?', sub:'Выбери одну', kind:'tile', multi:false,
       opts:[
-        {k:'space',t:'Космическая станция',d:'Иллюминатор и звёзды',ico:'★',c:'#1b2a6b'},
-        {k:'loft',t:'Гейминг-лофт',d:'Неон, кресло, экраны',ico:'GG',c:'var(--pink)'},
-        {k:'arena',t:'Спортивная арена',d:'Кубки и табло',img:'assets/cup.png',c:'#fff'},
-        {k:'lab',t:'Лаборатория',d:'Роботы и колбы',ico:'LAB',c:'var(--mint)'},
-        {k:'magic',t:'Башня мага',d:'Свитки и кристаллы',ico:'✦',c:'#5b3cc4'},
-        {k:'ocean',t:'Подводная база',d:'Рыбы за стеклом',ico:'≈',c:'#0aa3c2'}] },
+        {k:'space',t:'Космическая станция',d:'Иллюминатор и звёзды',img:'assets/ic/room_space.png',c:'none'},
+        {k:'loft',t:'Гейминг-лофт',d:'Неон, кресло, экраны',img:'assets/ic/room_loft.png',c:'none'},
+        {k:'arena',t:'Спортивная арена',d:'Кубки и табло',img:'assets/ic/room_arena.png',c:'none'},
+        {k:'lab',t:'Лаборатория',d:'Роботы и колбы',img:'assets/ic/room_lab.png',c:'none'},
+        {k:'magic',t:'Башня мага',d:'Свитки и кристаллы',img:'assets/ic/room_magic.png',c:'none'},
+        {k:'ocean',t:'Подводная база',d:'Рыбы за стеклом',img:'assets/ic/room_ocean.png',c:'none'}] },
     { id:'prize', title:'Какой приз ты бы хотел?', sub:'Можно выбрать два', kind:'tile', multi:2,
       opts:[
-        {k:'stickers',t:'Стикеры',d:'Наклейки с героями',ico:'STK',c:'var(--pink)'},
-        {k:'merch',t:'Брелок или значок',d:'С символом школы',ico:'★',c:'var(--yellow)'},
-        {k:'tshirt',t:'Футболка',d:'Только для своих',ico:'TEE',c:'var(--blue)'},
-        {k:'music',t:'Выбрать музыку',d:'На разминке для всей группы',ico:'♫',c:'var(--mint)'},
-        {k:'friend',t:'Занятие для друга',d:'Привести друга бесплатно',ico:'+1',c:'var(--orange)'},
-        {k:'tv',t:'Попасть на экран',d:'Твой герой на ТВ в холле',ico:'TV',c:'var(--lime)'}] },
+        {k:'stickers',t:'Стикеры',d:'Наклейки с героями',img:'assets/ic/prize_stickers.png',c:'none'},
+        {k:'merch',t:'Брелок или значок',d:'С символом школы',img:'assets/ic/prize_merch.png',c:'none'},
+        {k:'tshirt',t:'Футболка',d:'Только для своих',img:'assets/ic/prize_tshirt.png',c:'none'},
+        {k:'music',t:'Выбрать музыку',d:'На разминке для всей группы',img:'assets/ic/prize_music.png',c:'none'},
+        {k:'friend',t:'Занятие для друга',d:'Привести друга бесплатно',img:'assets/ic/prize_friend.png',c:'none'},
+        {k:'tv',t:'Попасть на экран',d:'Твой герой на ТВ в холле',img:'assets/ic/prize_tv.png',c:'none'}] },
     { id:'play', title:'Что бы ты делал чаще всего?', sub:'Можно выбрать два', kind:'tile', multi:2,
       opts:[
         {k:'room',t:'Украшать комнату',d:'Трофеи на полках, гости',img:'assets/cup.png',c:'#fff'},
         {k:'safe',t:'Открывать сейфы',d:'Отгадай код и разбей капсулу',img:'assets/chest.png',c:'#fff'},
         {k:'craft',t:'Крафтить',d:'Собирать вещи из деталей',img:'assets/jetpack.png',c:'#fff'},
-        {k:'league',t:'Соревноваться',d:'Лига и топ недели',ico:'#1',c:'var(--yellow)'},
-        {k:'squad',t:'Играть с отрядом',d:'Общая цель с друзьями',ico:'GO',c:'var(--pink)'},
-        {k:'dress',t:'Одевать героя',d:'Скины и предметы',ico:'★',c:'var(--mint)'}] },
+        {k:'league',t:'Соревноваться',d:'Лига и топ недели',img:'assets/ic/play_league.png',c:'none'},
+        {k:'squad',t:'Играть с отрядом',d:'Общая цель с друзьями',img:'assets/ic/play_squad.png',c:'none'},
+        {k:'dress',t:'Одевать героя',d:'Скины и предметы',img:'assets/ic/play_dress.png',c:'none'}] },
     { id:'quit', title:'Почему ребята обычно бросают кружки?', sub:'Можно выбрать два', kind:'tile', multi:2,
       opts:[
-        {k:'boring',t:'Становится скучно',d:'Одно и то же',ico:'zZ',c:'#fff'},
-        {k:'friends',t:'Ушли друзья',d:'Не с кем ходить',ico:'2→1',c:'var(--pink)'},
-        {k:'hard',t:'Слишком сложно',d:'Не получается',ico:'!?',c:'var(--orange)'},
-        {k:'time',t:'Нет времени',d:'Школа, уроки',ico:'⏰',c:'var(--yellow)'},
-        {k:'noprogress',t:'Не видно результата',d:'Непонятно, зачем ходить',ico:'?',c:'var(--mint)'},
-        {k:'parents',t:'Решили родители',d:'Дорого или далеко',ico:'₽',c:'var(--blue)'}] },
+        {k:'boring',t:'Становится скучно',d:'Одно и то же',img:'assets/ic/quit_boring.png',c:'none'},
+        {k:'friends',t:'Ушли друзья',d:'Не с кем ходить',img:'assets/ic/quit_friends.png',c:'none'},
+        {k:'hard',t:'Слишком сложно',d:'Не получается',img:'assets/ic/quit_hard.png',c:'none'},
+        {k:'time',t:'Нет времени',d:'Школа, уроки',img:'assets/ic/quit_time.png',c:'none'},
+        {k:'noprogress',t:'Не видно результата',d:'Непонятно, зачем ходить',img:'assets/ic/quit_noprogress.png',c:'none'},
+        {k:'parents',t:'Решили родители',d:'Дорого или далеко',img:'assets/ic/quit_parents.png',c:'none'}] },
     { id:'name', title:'Как назвать приложение?', sub:'Выбери самое крутое', kind:'tile', multi:false,
       opts:[
         {k:'gerograd',t:'Героград',d:'',img:'assets/gerograd_avatar.jpg',c:'#fff'},
-        {k:'prokachka',t:'Прокачка',d:'',ico:'⚙',c:'var(--lime)'},
-        {k:'lvlup',t:'LVL UP',d:'',ico:'LV',c:'var(--orange)'},
-        {k:'kvestoria',t:'Квестория',d:'',ico:'Q',c:'var(--pink)'}] }
+        {k:'prokachka',t:'Прокачка',d:'',img:'assets/ic/play_prokachka.png',c:'none'},
+        {k:'lvlup',t:'LVL UP',d:'',img:'assets/ic/play_lvlup.png',c:'none'},
+        {k:'kvestoria',t:'Квестория',d:'',img:'assets/ic/play_kvestoria.png',c:'none'}] }
   ];
 
   let step = -1, ans = {};
   const tg = window.Telegram && window.Telegram.WebApp;
-  const inTg = !!(tg && tg.initData);
+  const inTg = !!(tg && tg.platform && tg.platform !== 'unknown');
   if(tg){ try{ tg.ready(); tg.expand(); tg.setHeaderColor('#47bfff'); tg.setBackgroundColor('#47bfff'); }catch(e){} }
 
   function steps(){
@@ -321,7 +339,7 @@ html,body{overflow-x:hidden}
             <span class="ph-tabs"><i></i><i></i><i></i><i></i></span>
           </span><b>${o.t}</b><small>${o.d}</small></button>`).join('') + `</div>`;
     } else {
-      html += `<div class="grid g2">` + q.opts.map(o => `<button type="button" class="opt tile" data-k="${o.k}" aria-pressed="${sel.includes(o.k)}"><span class="ico" style="background:${o.c}">${o.img ? `<img src="${o.img}" alt="">` : o.ico}</span><span><b>${o.t}</b><small>${o.d}</small></span></button>`).join('') + `</div>`;
+      html += `<div class="grid g2 tiles">` + q.opts.map(o => `<button type="button" class="opt tile" data-k="${o.k}" aria-pressed="${sel.includes(o.k)}"><span class="ico${o.img ? ' ico-img' : ''}" style="background:${o.c}">${o.img ? `<img src="${o.img}" alt="">` : o.ico}</span><span><b>${o.t}</b><small>${o.d}</small></span></button>`).join('') + `</div>`;
     }
     sc.innerHTML = html;
     sc.querySelectorAll('.opt').forEach(b => b.onclick = () => pick(q, b.dataset.k));
