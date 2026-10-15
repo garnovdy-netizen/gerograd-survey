@@ -1,0 +1,380 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Героград: опрос</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Nunito:wght@700;800;900&display=swap">
+<style>
+/* Layout: kiosk poll for kids — one question per screen, big tap cards, sticky "Дальше" bar. Arcade-sticker world, single light look by choice. */
+:root{
+  --sky:#47bfff; --sky-2:#8fd9ff; --paper:#fff; --ink:#121212; --ink-2:#3d4350; --ink-3:#7a8394;
+  --lime:#c4ff3d; --yellow:#ffd60a; --orange:#ff7a1a; --pink:#ff3d8b; --blue:#1f6bff; --mint:#2fd6a0;
+  --line:3px solid var(--ink); --sh:0 4px 0 var(--ink);
+  --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --f-body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{margin:0;background:var(--sky);color:var(--ink);font-family:var(--f-body);font-weight:800;-webkit-tap-highlight-color:transparent;
+  background-image:radial-gradient(rgba(255,255,255,.3) 1.6px,transparent 1.8px),linear-gradient(180deg,var(--sky),var(--sky-2));background-size:18px 18px,100% 100%;background-attachment:fixed}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px calc(110px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:900;font-size:18px}
+.logo i{width:34px;height:34px;border-radius:10px;background:var(--lime);border:var(--line);display:grid;place-items:center;font-style:normal;font-size:16px;box-shadow:0 3px 0 var(--ink)}
+.steps{display:flex;gap:6px}
+.steps span{width:28px;height:10px;border-radius:999px;background:rgba(255,255,255,.6);border:2px solid var(--ink)}
+.steps span.on{background:var(--lime)}
+.q-title{font-family:var(--f-display);font-weight:900;font-size:clamp(24px,5vw,36px);line-height:1.25;margin:0;text-wrap:balance}
+.q-sub{margin:0;font-size:16px;color:var(--ink-2)}
+.card{background:var(--paper);border:var(--line);border-radius:24px;box-shadow:var(--sh);padding:18px}
+
+/* Intro */
+.intro{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;overflow:hidden;position:relative;background:var(--yellow)}
+.intro h1{font-family:var(--f-display);font-weight:900;font-size:clamp(28px,6vw,44px);line-height:1.08;margin:0 0 10px;text-wrap:balance}
+.intro p{margin:0;font-size:17px;line-height:1.4;max-width:34ch}
+.intro img{width:clamp(110px,24vw,170px);margin:-10px -6px -22px 0}
+.intro>div{min-width:0}
+.facts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{padding:5px 12px;border-radius:999px;border:2px solid var(--ink);background:#fff;font-size:13px;font-weight:900}
+
+/* Option cards */
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opt{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:12px;border-radius:22px;background:#fff;border:var(--line);box-shadow:var(--sh);text-align:left;transition:transform .12s,box-shadow .12s,background .12s}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.opt[aria-pressed="true"]{background:var(--lime);transform:translateY(-3px) rotate(-1deg);box-shadow:0 7px 0 var(--ink)}
+.opt[aria-pressed="true"]::after{content:"✓";position:absolute;top:-12px;right:-10px;width:36px;height:36px;border-radius:50%;background:var(--pink);color:#fff;border:var(--line);display:grid;place-items:center;font-size:18px;font-weight:900}
+.opt b{font-family:var(--f-display);font-weight:900;font-size:16px;line-height:1.2}
+.opt small{font-size:13px;color:var(--ink-2);line-height:1.3}
+.opt .pic{border-radius:14px;border:2px solid var(--ink);overflow:hidden;background:#fff;aspect-ratio:4/3}
+.opt .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.age{align-items:center;text-align:center;padding:22px 10px}
+.age .big{font-family:var(--f-display);font-weight:900;font-size:clamp(26px,6vw,40px)}
+.tile{flex-direction:row;align-items:center;gap:12px;padding:14px}
+.tile .ico{width:52px;height:52px;flex:none;border-radius:14px;border:2px solid var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:900;font-size:15px;color:#fff;-webkit-text-stroke:1px var(--ink);paint-order:stroke fill;text-shadow:0 2px 0 var(--ink)}
+.tile small:empty{display:none}
+.tile b{overflow-wrap:anywhere;hyphens:auto}
+@media (max-width:560px){
+  .g2{gap:10px}
+  .tile{padding:10px;gap:8px}
+  .tile .ico{width:40px;height:40px;font-size:12px;border-radius:11px}
+  .tile .ico img{width:34px;height:34px}
+  .tile b{font-size:13px}
+  .tile small{font-size:11.5px}
+}
+.steps{flex-wrap:wrap;justify-content:flex-end;max-width:60%;gap:4px}
+.steps span{width:14px!important;height:9px}
+html,body{overflow-x:hidden}
+.tile .ico img{width:46px;height:46px;object-fit:contain}
+.tile>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+
+/* Mini phone mockups for the look question */
+.phone{border-radius:20px;border:3px solid var(--ink);overflow:hidden;display:flex;flex-direction:column;gap:7px;padding:9px;font-size:10px}
+.ph-top{display:flex;justify-content:space-between;align-items:center;gap:4px}
+.ph-name{font-weight:900;font-size:10px}
+.ph-coin{padding:2px 7px;border-radius:999px;font-weight:900;font-size:9px}
+.ph-stage{height:150px;border-radius:14px;display:grid;place-items:end center;overflow:hidden;position:relative}
+.ph-stage img{position:absolute;bottom:0;left:50%;transform:translateX(-50%)}
+.ph-stage img{height:92%;max-width:100%;object-fit:contain}
+.ph-bar{height:9px;border-radius:999px;overflow:hidden}
+.ph-bar i{display:block;height:100%;width:70%}
+.ph-btn{border-radius:10px;padding:7px;text-align:center;font-weight:900;font-size:10px}
+.ph-tabs{display:flex;justify-content:space-around;padding-top:2px}
+.ph-tabs i{width:16px;height:16px;border-radius:5px}
+/* A arcade */
+.lookA{background:#47bfff;background-image:radial-gradient(rgba(255,255,255,.35) 1.2px,transparent 1.4px);background-size:10px 10px;color:#121212}
+.lookA .ph-coin{background:#fff;border:2px solid #121212}
+.lookA .ph-stage{background:#ffd60a;border:2px solid #121212}
+.lookA .ph-bar{background:#fff;border:2px solid #121212}.lookA .ph-bar i{background:#c4ff3d}
+.lookA .ph-btn{background:#c4ff3d;border:2px solid #121212;box-shadow:0 2px 0 #121212}
+.lookA .ph-tabs i{background:#fff;border:2px solid #121212}
+/* B neon */
+.lookB{background:#0c0e13;color:#fff}
+.lookB .ph-coin{background:#161a22;border:1px solid #29e4ff;color:#29e4ff}
+.lookB .ph-stage{background:radial-gradient(circle at 50% 70%,#123a4a,#0c0e13 70%);border:1px solid #29e4ff;box-shadow:0 0 12px rgba(41,228,255,.45) inset}
+.lookB .ph-bar{background:#1c212b}.lookB .ph-bar i{background:linear-gradient(90deg,#29e4ff,#ff3d8b);box-shadow:0 0 8px #29e4ff}
+.lookB .ph-btn{background:#ff3d8b;color:#fff;box-shadow:0 0 12px rgba(255,61,139,.7)}
+.lookB .ph-tabs i{background:#1c212b;border:1px solid #29e4ff}
+/* C soft clay */
+.lookC{background:linear-gradient(180deg,#ffe8dc,#e3f7ef);color:#3b3350}
+.lookC .ph-coin{background:#fff;box-shadow:0 3px 8px rgba(90,60,90,.15)}
+.lookC .ph-stage{background:#fff;border-radius:18px;box-shadow:0 8px 18px rgba(90,60,90,.15)}
+.lookC .ph-bar{background:#fff;box-shadow:inset 0 1px 3px rgba(90,60,90,.2)}.lookC .ph-bar i{background:linear-gradient(90deg,#8fe3c2,#7cc8ff)}
+.lookC .ph-btn{background:linear-gradient(180deg,#ff9b83,#ff7a8a);color:#fff;border-radius:14px;box-shadow:0 6px 12px rgba(255,122,138,.4)}
+.lookC .ph-tabs i{background:#fff;border-radius:50%;box-shadow:0 2px 5px rgba(90,60,90,.15)}
+
+/* Bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-top:var(--line)}
+.bar-in{max-width:760px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.bar .hint{flex:1;min-width:0;font-size:14px;color:var(--ink-2)}
+.btn{min-height:56px;padding:0 26px;border-radius:18px;border:var(--line);box-shadow:var(--sh);font-family:var(--f-display);font-weight:900;font-size:17px;background:var(--lime);white-space:nowrap}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn[disabled]{background:#e9ecf2;color:var(--ink-3);border-color:#c8ced9;box-shadow:none;cursor:default;transform:none}
+.btn.ghost{background:#fff}
+.btn.big{width:100%;min-height:64px;font-size:20px}
+
+/* Thanks */
+.thanks{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px 18px}
+.thanks img{width:180px;animation:pop .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(0) rotate(-20deg)}}
+.thanks h2{font-family:var(--f-display);font-weight:900;font-size:clamp(26px,6vw,38px);margin:0}
+.thanks p{margin:0;font-size:17px;color:var(--ink-2);max-width:36ch}
+.count{font-family:var(--f-display);font-weight:900;font-size:13px;padding:6px 12px;border-radius:999px;background:var(--yellow);border:2px solid var(--ink)}
+
+/* Results */
+.adult{font-size:13px;color:var(--ink);text-decoration:underline;text-underline-offset:3px;align-self:center;padding:8px}
+.res h3{font-family:var(--f-display);font-weight:900;font-size:16px;margin:0 0 10px}
+.res-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) 44px;gap:10px;align-items:center;padding:5px 0;font-size:14px}
+.res-row .track{height:18px;border-radius:999px;border:2px solid var(--ink);background:#f1f4f9;overflow:hidden}
+.res-row .track i{display:block;height:100%;background:var(--lime);border-right:2px solid var(--ink)}
+.res-row.win .track i{background:var(--orange)}
+.res-row b{text-align:right;font-variant-numeric:tabular-nums}
+.res-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.res-list{display:flex;flex-direction:column;gap:14px}
+
+#fx{position:fixed;inset:0;pointer-events:none;z-index:20}
+
+@media (max-width:560px){
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .g3 .opt{padding:8px;border-radius:16px}
+  .g3 .opt b{font-size:13px}
+  .g3 .opt small{display:none}
+  .intro{grid-template-columns:1fr}
+  .intro img{position:absolute;right:4px;top:10px;width:78px;margin:0}
+  .intro h1{padding-right:64px}
+  .phone{padding:6px;gap:5px;border-radius:14px}
+  .ph-name{display:none}
+  .ph-btn{font-size:8px;padding:6px 2px}
+  .ph-stage{height:120px}
+  .bar .hint{display:none}
+  .bar-in{justify-content:space-between}
+  .btn{padding:0 18px;font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="logo"><img src="assets/gerograd_avatar.jpg" alt="" style="width:36px;height:36px;border-radius:50%;border:3px solid var(--ink)">Героград</div>
+    <div class="steps" id="steps" aria-hidden="true"></div>
+  </header>
+  <main id="screen"></main>
+</div>
+
+<div class="bar" id="bar" hidden>
+  <div class="bar-in">
+    <span class="hint" id="barHint"></span>
+    <button class="btn ghost" type="button" id="back">Назад</button>
+    <button class="btn" type="button" id="next" disabled>Дальше</button>
+  </div>
+</div>
+<canvas id="fx"></canvas>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+
+
+  const QS = [
+    { id:'age', title:'Сколько тебе лет?', sub:'Чтобы понять, что нравится разным возрастам', kind:'age', multi:false,
+      opts:[{k:'7-9',t:'7–9'},{k:'10-12',t:'10–12'},{k:'13-16',t:'13–16'}] },
+    { id:'chat', title:'Где ты переписываешься с друзьями?', sub:'Можно выбрать до трёх', kind:'tile', multi:3,
+      opts:[
+        {k:'telegram',t:'Telegram',d:'',ico:'TG',c:'#2aabee'},
+        {k:'max',t:'MAX',d:'',ico:'MAX',c:'#7b5cff'},
+        {k:'vk',t:'ВК',d:'',ico:'VK',c:'#0077ff'},
+        {k:'whatsapp',t:'WhatsApp',d:'',ico:'WA',c:'#25d366'},
+        {k:'school',t:'Сферум или школьный чат',d:'',ico:'SCH',c:'var(--yellow)'},
+        {k:'nophone',t:'У меня нет своего телефона',d:'Пишу с телефона родителей',ico:'—',c:'#fff'}] },
+    { id:'video', title:'Где ты смотришь видео?', sub:'Можно выбрать до трёх', kind:'tile', multi:3,
+      opts:[
+        {k:'youtube',t:'YouTube',d:'',ico:'YT',c:'#ff3b30'},
+        {k:'vkvideo',t:'VK Видео',d:'',ico:'VK',c:'#0077ff'},
+        {k:'tiktok',t:'TikTok',d:'',ico:'TT',c:'#121212'},
+        {k:'tgchannels',t:'Каналы в Telegram',d:'',ico:'TG',c:'#2aabee'},
+        {k:'rutube',t:'Rutube',d:'',ico:'RT',c:'#0b1e3a'},
+        {k:'likee',t:'Likee',d:'',ico:'LK',c:'var(--pink)'}] },
+    { id:'games', title:'Во что ты играешь?', sub:'Можно выбрать до трёх', kind:'tile', multi:3,
+      opts:[
+        {k:'brawl',t:'Brawl Stars',d:'',ico:'BS',c:'var(--yellow)'},
+        {k:'roblox',t:'Roblox',d:'',ico:'RB',c:'#e2231a'},
+        {k:'minecraft',t:'Minecraft',d:'',ico:'MC',c:'#5d9c3a'},
+        {k:'standoff',t:'Standoff 2',d:'',ico:'SO',c:'var(--orange)'},
+        {k:'clash',t:'Clash Royale',d:'',ico:'CR',c:'#3b82f6'},
+        {k:'genshin',t:'Genshin Impact',d:'',ico:'GI',c:'var(--mint)'},
+        {k:'gdash',t:'Geometry Dash',d:'',ico:'GD',c:'var(--lime)'},
+        {k:'none',t:'Почти не играю',d:'',ico:'—',c:'#fff'}] },
+    { id:'hero', title:'Каким будет твой герой?', sub:'Выбери стиль, в котором хочешь своего персонажа', kind:'pic', multi:false,
+      opts:[
+        {k:'3d',t:'Как в Fortnite',d:'Объёмный 3D',img:'assets/style_3d.jpg'},
+        {k:'anime',t:'Аниме',d:'Рисованный, как в аниме-играх',img:'assets/style_anime.jpg'},
+        {k:'blocky',t:'Блочный',d:'Как в Roblox и Minecraft',img:'assets/style_blocky.jpg'},
+        {k:'cartoon',t:'Мультяшный',d:'Как наклейка или Brawl Stars',img:'assets/style_cartoon.jpg'}] },
+    { id:'heropart', title:'Что тебе важнее всего в герое?', sub:'Можно выбрать два', kind:'tile', multi:2,
+      opts:[
+        {k:'face',t:'Лицо и причёска',d:'Чтобы был похож на меня',ico:'☺',c:'var(--yellow)'},
+        {k:'skins',t:'Одежда и скины',d:'Куртки, шлемы, кроссовки',ico:'TEE',c:'var(--blue)'},
+        {k:'pet',t:'Питомец',d:'Робот, дракон или кот рядом',ico:'PET',c:'var(--pink)'},
+        {k:'dance',t:'Танцы и эмоции',d:'Показать друзьям',ico:'♪',c:'var(--mint)'},
+        {k:'gear',t:'Гаджеты',d:'Ранец, ховерборд, дрон',img:'assets/jetpack.png',c:'#fff'},
+        {k:'level',t:'Уровень и титул',d:'Чтобы все видели, кто я',ico:'LV',c:'var(--orange)'}] },
+    { id:'look', title:'Какое приложение круче?', sub:'Посмотри на экраны и выбери один', kind:'look', multi:false,
+      opts:[{k:'arcade',t:'Аркада',d:'Яркое, как наклейки'},{k:'neon',t:'Неон',d:'Тёмное, светится'},{k:'soft',t:'Мягкое',d:'Пастель и мягкие формы'}] },
+    { id:'room', title:'Какой будет твоя комната трофеев?', sub:'Выбери одну', kind:'tile', multi:false,
+      opts:[
+        {k:'space',t:'Космическая станция',d:'Иллюминатор и звёзды',ico:'★',c:'#1b2a6b'},
+        {k:'loft',t:'Гейминг-лофт',d:'Неон, кресло, экраны',ico:'GG',c:'var(--pink)'},
+        {k:'arena',t:'Спортивная арена',d:'Кубки и табло',img:'assets/cup.png',c:'#fff'},
+        {k:'lab',t:'Лаборатория',d:'Роботы и колбы',ico:'LAB',c:'var(--mint)'},
+        {k:'magic',t:'Башня мага',d:'Свитки и кристаллы',ico:'✦',c:'#5b3cc4'},
+        {k:'ocean',t:'Подводная база',d:'Рыбы за стеклом',ico:'≈',c:'#0aa3c2'}] },
+    { id:'prize', title:'Какой приз ты бы хотел?', sub:'Можно выбрать два', kind:'tile', multi:2,
+      opts:[
+        {k:'stickers',t:'Стикеры',d:'Наклейки с героями',ico:'STK',c:'var(--pink)'},
+        {k:'merch',t:'Брелок или значок',d:'С символом школы',ico:'★',c:'var(--yellow)'},
+        {k:'tshirt',t:'Футболка',d:'Только для своих',ico:'TEE',c:'var(--blue)'},
+        {k:'music',t:'Выбрать музыку',d:'На разминке для всей группы',ico:'♫',c:'var(--mint)'},
+        {k:'friend',t:'Занятие для друга',d:'Привести друга бесплатно',ico:'+1',c:'var(--orange)'},
+        {k:'tv',t:'Попасть на экран',d:'Твой герой на ТВ в холле',ico:'TV',c:'var(--lime)'}] },
+    { id:'play', title:'Что бы ты делал чаще всего?', sub:'Можно выбрать два', kind:'tile', multi:2,
+      opts:[
+        {k:'room',t:'Украшать комнату',d:'Трофеи на полках, гости',img:'assets/cup.png',c:'#fff'},
+        {k:'safe',t:'Открывать сейфы',d:'Отгадай код и разбей капсулу',img:'assets/chest.png',c:'#fff'},
+        {k:'craft',t:'Крафтить',d:'Собирать вещи из деталей',img:'assets/jetpack.png',c:'#fff'},
+        {k:'league',t:'Соревноваться',d:'Лига и топ недели',ico:'#1',c:'var(--yellow)'},
+        {k:'squad',t:'Играть с отрядом',d:'Общая цель с друзьями',ico:'GO',c:'var(--pink)'},
+        {k:'dress',t:'Одевать героя',d:'Скины и предметы',ico:'★',c:'var(--mint)'}] },
+    { id:'quit', title:'Почему ребята обычно бросают кружки?', sub:'Можно выбрать два', kind:'tile', multi:2,
+      opts:[
+        {k:'boring',t:'Становится скучно',d:'Одно и то же',ico:'zZ',c:'#fff'},
+        {k:'friends',t:'Ушли друзья',d:'Не с кем ходить',ico:'2→1',c:'var(--pink)'},
+        {k:'hard',t:'Слишком сложно',d:'Не получается',ico:'!?',c:'var(--orange)'},
+        {k:'time',t:'Нет времени',d:'Школа, уроки',ico:'⏰',c:'var(--yellow)'},
+        {k:'noprogress',t:'Не видно результата',d:'Непонятно, зачем ходить',ico:'?',c:'var(--mint)'},
+        {k:'parents',t:'Решили родители',d:'Дорого или далеко',ico:'₽',c:'var(--blue)'}] },
+    { id:'name', title:'Как назвать приложение?', sub:'Выбери самое крутое', kind:'tile', multi:false,
+      opts:[
+        {k:'gerograd',t:'Героград',d:'',img:'assets/gerograd_avatar.jpg',c:'#fff'},
+        {k:'prokachka',t:'Прокачка',d:'',ico:'⚙',c:'var(--lime)'},
+        {k:'lvlup',t:'LVL UP',d:'',ico:'LV',c:'var(--orange)'},
+        {k:'kvestoria',t:'Квестория',d:'',ico:'Q',c:'var(--pink)'}] }
+  ];
+
+  let step = -1, ans = {};
+  const tg = window.Telegram && window.Telegram.WebApp;
+  const inTg = !!(tg && tg.initData);
+  if(tg){ try{ tg.ready(); tg.expand(); tg.setHeaderColor('#47bfff'); tg.setBackgroundColor('#47bfff'); }catch(e){} }
+
+  function steps(){
+    $('#steps').innerHTML = QS.map((q,i) => `<span class="${typeof step === 'number' && i <= step ? 'on' : ''}"></span>`).join('');
+  }
+
+  function render(){
+    steps();
+    const sc = $('#screen');
+    $('#bar').hidden = !(typeof step === 'number' && step >= 0);
+    if(step === -1){
+      sc.innerHTML = `
+        <section class="card intro">
+          <div>
+            <h1>Помоги придумать игру нашей школы!</h1>
+            <p>Здесь будет твой герой, трофеи за занятия и призы. Ответь на 12 вопросов, это займёт 3 минуты.</p>
+            <div class="facts"><span class="chip">12 вопросов</span><span class="chip">3 минуты</span><span class="chip">без имени</span></div>
+          </div>
+          <img src="assets/hero.png" alt="">
+        </section>
+        <button class="btn big" type="button" id="start">Начать</button>`;
+      $('#start').onclick = () => { ans = {}; step = 0; render(); window.scrollTo({top:0}); };
+      return;
+    }
+    if(step === 'thanks'){
+      sc.innerHTML = `
+        <section class="card thanks">
+          <img src="assets/chest.png" alt="">
+          <h2>${inTg ? 'Отправляем…' : 'Спасибо!'}</h2>
+          <p>${inTg ? 'Секунду, передаём твои ответы в Героград.' : 'Чтобы голос засчитался, открой опрос через бота Героград в Telegram.'}</p>
+        </section>`;
+      return;
+    }
+
+    const q = QS[step];
+    const sel = ans[q.id] || [];
+    let html = `<h2 class="q-title">${q.title}</h2><p class="q-sub">${q.sub}</p>`;
+    if(q.kind === 'age'){
+      html += `<div class="grid g3">` + q.opts.map(o => `<button type="button" class="opt age" data-k="${o.k}" aria-pressed="${sel.includes(o.k)}"><span class="big">${o.t}</span><small>лет</small></button>`).join('') + `</div>`;
+    } else if(q.kind === 'pic'){
+      html += `<div class="grid g2">` + q.opts.map(o => `<button type="button" class="opt" data-k="${o.k}" aria-pressed="${sel.includes(o.k)}"><span class="pic"><img src="${o.img}" alt="${o.t}"></span><b>${o.t}</b><small>${o.d}</small></button>`).join('') + `</div>`;
+    } else if(q.kind === 'look'){
+      const cls = {arcade:'lookA',neon:'lookB',soft:'lookC'};
+      html += `<div class="grid g3">` + q.opts.map(o => `<button type="button" class="opt" data-k="${o.k}" aria-pressed="${sel.includes(o.k)}">
+          <span class="phone ${cls[o.k]}" aria-hidden="true">
+            <span class="ph-top"><span class="ph-name">Миша · ур. 7</span><span class="ph-coin">340</span></span>
+            <span class="ph-stage"><img src="assets/hero.png" alt=""></span>
+            <span class="ph-bar"><i></i></span>
+            <span class="ph-btn">Отметиться</span>
+            <span class="ph-tabs"><i></i><i></i><i></i><i></i></span>
+          </span><b>${o.t}</b><small>${o.d}</small></button>`).join('') + `</div>`;
+    } else {
+      html += `<div class="grid g2">` + q.opts.map(o => `<button type="button" class="opt tile" data-k="${o.k}" aria-pressed="${sel.includes(o.k)}"><span class="ico" style="background:${o.c}">${o.img ? `<img src="${o.img}" alt="">` : o.ico}</span><span><b>${o.t}</b><small>${o.d}</small></span></button>`).join('') + `</div>`;
+    }
+    sc.innerHTML = html;
+    sc.querySelectorAll('.opt').forEach(b => b.onclick = () => pick(q, b.dataset.k));
+    updateBar();
+  }
+
+  function pick(q, k){
+    let sel = ans[q.id] ? [...ans[q.id]] : [];
+    if(!q.multi){ sel = [k]; }
+    else if(sel.includes(k)){ sel = sel.filter(x => x !== k); }
+    else { sel.push(k); if(sel.length > q.multi) sel.shift(); }
+    ans[q.id] = sel;
+    $('#screen').querySelectorAll('.opt').forEach(b => b.setAttribute('aria-pressed', String(sel.includes(b.dataset.k))));
+    updateBar();
+    if(!q.multi) setTimeout(() => { if(step < QS.length - 1 && ans[q.id] && ans[q.id][0] === k){ step++; render(); window.scrollTo({top:0, behavior:'smooth'}); } }, 380);
+  }
+
+  function updateBar(){
+    const q = QS[step], sel = ans[q.id] || [];
+    $('#next').disabled = sel.length === 0;
+    $('#next').textContent = step === QS.length - 1 ? 'Готово' : 'Дальше';
+    $('#back').hidden = step === 0;
+    $('#barHint').textContent = q.multi ? `Выбрано ${sel.length} из ${q.multi}` : `Вопрос ${step + 1} из ${QS.length}`;
+  }
+
+  $('#next').onclick = async () => {
+    if(typeof step !== 'number' || step < 0) return;
+    if(step < QS.length - 1){ step++; render(); window.scrollTo({top:0}); return; }
+    const vote = { v: 3 };
+    QS.forEach(q => { const a = ans[q.id] || []; vote[q.id] = q.multi ? a : (a[0] || null); });
+    step = 'thanks'; render(); burst(); window.scrollTo({top:0});
+    if(inTg){ setTimeout(() => { try{ tg.sendData(JSON.stringify(vote)); }catch(e){} }, 900); }
+  };
+  $('#back').onclick = () => { if(typeof step === 'number' && step > 0){ step--; render(); } };
+
+  const cv = $('#fx'), cx = cv.getContext('2d');
+  function burst(){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    cv.width = innerWidth*dpr; cv.height = innerHeight*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
+    const cols = ['#c4ff3d','#ffd60a','#ff7a1a','#ff3d8b','#1f6bff','#2fd6a0'];
+    const ps = Array.from({length:140}, () => { const a = Math.random()*6.28, v = 4+Math.random()*9;
+      return {x:innerWidth/2,y:innerHeight*.35,vx:Math.cos(a)*v,vy:Math.sin(a)*v-5,r:Math.random()*6.28,vr:(Math.random()-.5)*.4,w:7+Math.random()*6,h:5+Math.random()*4,c:cols[Math.random()*cols.length|0]}; });
+    let f = 0;
+    (function tick(){
+      cx.clearRect(0,0,innerWidth,innerHeight);
+      ps.forEach(p => { p.vy += .28; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.strokeStyle = '#121212'; cx.lineWidth = 1.5;
+        cx.fillRect(-p.w/2,-p.h/2,p.w,p.h); cx.strokeRect(-p.w/2,-p.h/2,p.w,p.h); cx.restore(); });
+      if(++f < 140) requestAnimationFrame(tick); else cx.clearRect(0,0,innerWidth,innerHeight);
+    })();
+  }
+
+  render();
+})();
+</script>
